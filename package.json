@@ -20,7 +20,8 @@
     "simple-youtube-api": "^5.2.1",
     "yt-search": "^1.1.2",
     "ytdl-core": "^2.0.1",
-    "express": "^4.17.1"
+    "express": "^4.17.1",
+    "node-opus": "^0.3.2"
   },
   "engines": {
     "node": "8.x"
