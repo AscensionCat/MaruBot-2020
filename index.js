@@ -72,15 +72,6 @@ dbl.webhook.on('ready', hook => {
 });
 dbl.webhook.on('vote', vote => {
   console.log(`User with ID ${vote.user} just voted!`);
-
-  let voted = JSON.parse(fs.readFileSync("./prefixes.json", "utf8"));
-  
-  voted["voted"] = {
-    voted: vote.user
-};
-  fs.writeFile("./voters.json", JSON.stringify (voted), (err) => {
-    if (err) console.log(err)
-});
 });
 
 bot.on('guildMemberAdd', member => {
