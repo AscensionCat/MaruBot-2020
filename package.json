@@ -12,7 +12,7 @@
   "dependencies": {
     "connect": "^3.7.0",
     "dblapi.js": "^2.4.0",
-    "discord.js": "^11.5.1",
+    "discord.js": "^12.1.1",
     "ffmpeg": "0.0.4",
     "ms": "^2.1.2",
     "opusscript": "0.0.7",
