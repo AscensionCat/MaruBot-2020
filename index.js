@@ -1,18 +1,17 @@
-const { token, prefix, GOOGLE_API_KEY } = require("./botconfig.json");
-const botconfig = require("./botconfig.json")
-const Discord= require("discord.js");
-const Util = require ("discord.js");
+const { token, prefix, GOOGLE_API_KEY, Authorid } = require("./botconfig.json"); //Yapımcı ID, Bot tokeni, Bot prefixi, Google api keyini botconfig.json dan alır
+const Discord = require("discord.js");
 const fs = require("fs");
 const ms = require("ms");
-const YouTube = require("simple-youtube-api");
-const ytdl = require("ytdl-core");
-const opus = require("node-opus");
 const bot = new Discord.Client({disableEveryone: true});
 const DBL = require("dblapi.js");
 const express = require('express');
-bot.commands = new Discord.Collection();
+const YouTube = require("simple-youtube-api");
+const ytdl = require("ytdl-core");
+const opus = require("node-opus");
 const youtube = new YouTube(GOOGLE_API_KEY);
+bot.commands = new Discord.Collection();
 
+function loadcommands() {//Command Handler
 fs.readdir("./commands/", (err, files) => {
 
     if(err) console.log(err);
@@ -24,20 +23,100 @@ fs.readdir("./commands/", (err, files) => {
     }
 
     jsfile.forEach((f, i) =>{
+        delete require.cache[require.resolve(`./commands/${f}`)];
         let props = require(`./commands/${f}`);
         console.log(`${f} loaded!`);
         bot.commands.set(props.help.name, props);
     });
 
 });
+};
 
-
-bot.on("ready", async () => {
-    console.log(`${bot.user.username} is online!`);
+bot.on("ready", async () => {//Bot giriş yaptığında
+    console.log(`${bot.user.username} is online!`);//Konsola botismi online yaz
     
-    bot.user.setActivity(`.help`, {type: "PLAYING"});
+    bot.user.setActivity(`.help`, {type: "PLAYING"});//Bot discord aktivitesini .help yap tipi oynuyor yap
 
 }); 
+
+const queue = new Map();
+
+bot.on('warn', console.warn);
+
+bot.on('error', console.error);
+
+bot.on('ready', () => console.log('Yo this is ready'));
+
+bot.on('disconnect', () => console.log('I just disconnected, making sure you know, I will reconnect now...'));
+
+bot.on('shardReconnecting', id => console.log(`Shard with ID ${id} reconnected.`));
+
+bot.on('guildMemberAdd', member => { //JOİNMESAJ KISMI
+
+    let joinquitoda = JSON.parse(fs.readFileSync("./joinquitoda.json", "utf8")); //join quit oda db sini qoinquitoda olarak tanımladım
+    if(!joinquitoda[member.guild.id]){
+        joinquitoda[member.guild.id] = {
+            oda: "join-quit"
+        };
+    } //eğer o sunucuya tanımlı bir oda yoksa varsayılan olarak join-quit olarak belirledim
+
+    let joinqoda = joinquitoda[member.guild.id].oda; // Sunucuda tanımlanan odayı joinqoda olarak tanımladım
+        
+    let joinmesaj = JSON.parse(fs.readFileSync("./joinmesaj.json", "utf8")); // joinmesaj db sini joinmesaj olarak tanımladım
+    if(!joinmesaj[member.guild.id]){
+        joinmesaj[member.guild.id] = {
+            mesaj: `Kişisi aramıza katıldı.`
+        }; // eğer db de tanımlı bir mesaj yoksa varsayılan olarak Kişisi aramıza katıldı olarak belirledim
+    }
+
+    let jmesaj = joinmesaj[member.guild.id].mesaj; // Sunucuda tanımlanan mesajı jmesaj olarak tanımladım
+
+
+    const channel = member.guild.channels.cache.find(ch => ch.name === `${joinqoda}`); // Tanımlanan yada varsayılan olarak tanımladığımız odayı channel olarak belirledim
+    if (!channel) return; // Eğer öyle bir oda yoksa return olacak
+    channel.send(` <@${member.id}>, ${jmesaj}`); //Kişiyi etiketleyip belirlenen mesajı yazacak
+
+  });
+  
+bot.on('guildMemberRemove', member => { // QUITMESAJ KISMI
+
+    let joinquitoda = JSON.parse(fs.readFileSync("./joinquitoda.json", "utf8"));//Joinquitoda dbsini oku
+    if(!joinquitoda[member.guild.id]){
+        joinquitoda[member.guild.id] = {
+            oda: "join-quit"
+        };
+    }//eğer o sunucuya tanımlı bir oda yoksa varsayılan olarak join-quit olarak belirledim
+
+    let joinqoda = joinquitoda[member.guild.id].oda;// Sunucuda tanımlanan odayı joinqoda olarak tanımladım
+    
+    let quitmesaj = JSON.parse(fs.readFileSync("./quitmesaj.json", "utf8"));//Quitmesaj dbsini oku
+    if(!quitmesaj[member.guild.id]){
+        quitmesaj[member.guild.id] = {
+            mesaj: `Kişisi aramızdan ayrıldı.`
+        };
+    }// Eğer bir quitmesaj belirtilmemişse Kişisi aramızdan ayrıldı olarak belirle
+
+    let qmesaj = quitmesaj[member.guild.id].mesaj;// Sunucuda tanımlanan mesajı qmesaj olarak tanımladım
+
+    const channel = member.guild.channels.cache.find(ch => ch.name === `${joinqoda}`);// Tanımlanan yada varsayılan olarak tanımladığımız odayı channel olarak belirledim
+    if (!channel) return;// Eğer öyle bir oda yoksa return olacak
+    channel.send(` <@${member.id}>, ${qmesaj}`);//Kişiyi etiketleyip belirlenen mesajı yazacak
+
+  });
+
+bot.on('guildMemberAdd', member => { //AUTOROLE KISMI
+        
+    let autorole = JSON.parse(fs.readFileSync("./autorole.json", "utf8")); //Autorole db sini oku
+    if(!autorole[member.guild.id]){
+        return undefined;
+    } // Eğer bir autorole belirlenmediyse Dön
+
+    let arole = autorole[member.guild.id].rol; 
+    const brole = arole.substring(3, arole.length - 1);
+
+  member.roles.add(brole) //Kullanıcıya rolü ver
+})
+
 
 const app = express();
 app.use(express.static('public'));
@@ -55,18 +134,6 @@ app.get('/', function (req, res) {
     res.sendFile(path.join(__dirname + '/index.html'));
 });
 
-const queue = new Map();
-
-bot.on('warn', console.warn);
-
-bot.on('error', console.error);
-
-bot.on('ready', () => console.log('Yo this is ready'));
-
-bot.on('disconnect', () => console.log('I just disconnected, making sure you know, I will reconnect now...'));
-
-bot.on('reconnecting', () => console.log('I am reconnecting now!'));
-
 dbl.webhook.on('ready', hook => {
   console.log(`Webhook running at http://${hook.hostname}:${hook.port}${hook.path}`);
 });
@@ -74,95 +141,37 @@ dbl.webhook.on('vote', vote => {
   console.log(`User with ID ${vote.user} just voted!`);
 });
 
-bot.on('guildMemberAdd', member => {
 
-    let joinquitoda = JSON.parse(fs.readFileSync("./joinquitoda.json", "utf8"));
-    if(!joinquitoda[member.guild.id]){
-        joinquitoda[member.guild.id] = {
-            oda: "join-quit"
-        };
-    }
-
-    let joinqoda = joinquitoda[member.guild.id].oda;
-        
-    let joinmesaj = JSON.parse(fs.readFileSync("./joinmesaj.json", "utf8"));
-    if(!joinmesaj[member.guild.id]){
-        joinmesaj[member.guild.id] = {
-            mesaj: `Kişisi aramıza katıldı.`
-        };
-    }
-
-    let jmesaj = joinmesaj[member.guild.id].mesaj;
-
-
-    const channel = member.guild.channels.find(ch => ch.name === `${joinqoda}`);
-    if (!channel) return;
-    channel.send(` <@${member.id}>, ${jmesaj}`);
-
-  });
-  
-bot.on('guildMemberRemove', member => {
-
-    let joinquitoda = JSON.parse(fs.readFileSync("./joinquitoda.json", "utf8"));
-    if(!joinquitoda[member.guild.id]){
-        joinquitoda[member.guild.id] = {
-            oda: "join-quit"
-        };
-    }
-
-    let joinqoda = joinquitoda[member.guild.id].oda;
-    
-    let quitmesaj = JSON.parse(fs.readFileSync("./quitmesaj.json", "utf8"));
-    if(!quitmesaj[member.guild.id]){
-        quitmesaj[member.guild.id] = {
-            mesaj: `Kişisi aramızdan ayrıldı.`
-        };
-    }
-
-    let qmesaj = quitmesaj[member.guild.id].mesaj;
-
-    const channel = member.guild.channels.find(ch => ch.name === `${joinqoda}`);
-    if (!channel) return;
-    channel.send(` <@${member.id}>, ${qmesaj}`);
-
-  });
-
-bot.on('guildMemberAdd', member => {
-        
-    let autorole = JSON.parse(fs.readFileSync("./autorole.json", "utf8"));
-    if(!autorole[member.guild.id]){
-        return undefined;
-    }
-
-    let arole = autorole[member.guild.id].rol;
-    const brole = arole.substring(3, arole.length - 1);
-
-  member.addRole(brole)
-})
+    loadcommands();
 
 bot.on("message", async message => {
 
-    if(message.author.bot) return;
-    if(message.channel.type === "dm") return;
+    if(message.author.bot) return; //Mesajı yazan bir botsa dikkate alma
+    if(message.channel.type === "dm") return; //Mesaj dm den geliyorsa dikkate alma
 
-    let prefixes = JSON.parse(fs.readFileSync("./prefixes.json", "utf8"));
+    let prefixes = JSON.parse(fs.readFileSync("./prefixes.json", "utf8")); //Prefix db sini oku ve prefixes olarak tanımla
     if(!prefixes[message.guild.id]){
         prefixes[message.guild.id] = {
             prefixes: botconfig.prefix
         };
-    }
+    } //Eğer db de bir prefix yoksa botconfig de belirlenen prefixi kullan
 
-    let prefix = prefixes[message.guild.id].prefixes;
+    let prefix = prefixes[message.guild.id].prefixes; 
 
-    if (!message.content.startsWith(prefix)) return;
+    if (!message.content.startsWith(prefix)) return; //Eğer prefix yoksa dikkate alma
 
     let messageArray = message.content.split(" ");
     let cmd = messageArray[0];
     let args = messageArray.slice(1);
 
+    if (message.content.startsWith(`${prefix}reload`) && message.author.id == Authorid) { //Author dışında kimse komutu kullanamaz
+        message.channel.send({embed:{description: "Tüm komutlar yenilendi"}});
+        loadcommands()
+    };
+
     let commandfile = bot.commands.get(cmd.slice(prefix.length));
     if(commandfile) commandfile.run(bot,message,args);
-    
+
 });
 
 bot.on('message', async msg => { //eslint-disable-line
@@ -186,7 +195,7 @@ bot.on('message', async msg => { //eslint-disable-line
     const serverQueue = queue.get(msg.guild.id);
     try {
     if (msg.content.startsWith(`${prefix}play`)) {
-        const voiceChannel = msg.member.voiceChannel;
+        const voiceChannel = msg.member.voice.channel;
         if (!voiceChannel) return msg.channel.send('Üzgünüm fakat ses kanalında olmalısın.');
         const permissions = voiceChannel.permissionsFor(msg.client.user);
         if (!permissions.has('CONNECT')) {
@@ -204,25 +213,27 @@ bot.on('message', async msg => { //eslint-disable-line
                     const video2 = await youtube.getVideoByID(video.id); // eslint-disable-line no-await-in-loop
                     await handleVideo(video2, msg, voiceChannel, true);
                 }
-                return msg.channel.send(`Playlist: **${playlist.title}** sıraya eklendi`);
+                return msg.channel.send(new Discord.MessageEmbed()
+                .setColor("#FFC900")
+                .addField("Playlist", `Playlist: **${playlist.title}** sıraya eklendi`))
             } catch (error) {
                 try {
                     try {
                         var video = await youtube.getVideo(url);
                     } catch (error) {
                         try {
-                            var videos = await youtube.searchVideos(searchString, 10);
+                            var videos = await youtube.searchVideos(searchString, 5);
                             let index = 0;
-                            msg.channel.send(`
-         __**Şarkı seçimi:**__
-        ${videos.map(video2 => `** ${++index} -** ${video2.title}`).join('\n')}
-        Lütfen 1 ile 10 arasından seç ve numarasını yaz
-                                    `);
+                            msg.channel.send(new Discord.MessageEmbed()
+                            .setDescription("Müzik seçimi")
+                            .setColor("#0C9800")
+                            .addField("Şarkı", `${videos.map(video2 => `** ${++index} -** ${video2.title}`).join('\n')}`)
+                            .addField("Seçim: ", "Lütfen 1 ile 5 arasından seç ve numarasını yaz"))
                             //eslint-disable-next-line max-depth
                             try {
-                                var response = await msg.channel.awaitMessages(msg2 => msg2.content > 0 && msg2.content < 11, {
+                                var response = await msg.channel.awaitMessages(msg2 => msg2.content > 0 && msg2.content < 6, {
                                     maxMatches: 1,
-                                    time: 20000,
+                                    time: 10000,
                                     errors: ['time']
                                 });
                             } catch (err) {
@@ -248,23 +259,28 @@ bot.on('message', async msg => { //eslint-disable-line
                 var video = await youtube.getVideo(url);
             } catch (error) {
                 try {
-                    var videos = await youtube.searchVideos(searchString, 10);
+                    var videos = await youtube.searchVideos(searchString, 5);
                     let index = 0;
-                    msg.channel.send(`
+                    msg.channel.send(new Discord.MessageEmbed()
+                    .setDescription("Müzik seçimi")
+                    .setColor("#0C9800")
+                    .addField("Şarkı", `${videos.map(video2 => `** ${++index} -** ${video2.title}`).join('\n')}`)
+                    .addField("Seçim: ", "Lütfen 1 ile 5 arasından seç ve numarasını yaz"))
+                    /*msg.channel.send(`
  __**Şarkı seçimi:**__
 ${videos.map(video2 => `** ${++index} -** ${video2.title}`).join('\n')}
 Lütfen 1 ile 10 arasından seç ve numarasını yaz
-                            `);
+                            `);*/
                     //eslint-disable-next-line max-depth
                     try {
-                        var response = await msg.channel.awaitMessages(msg2 => msg2.content > 0 && msg2.content < 11, {
-                            maxMatches: 1,
-                            time: 20000,
+                        var response = await msg.channel.awaitMessages(msg2 => msg2.content > 0 && msg2.content < 6, {
+                            max: 1,
+                            time: 10000,
                             errors: ['time']
                         });
                     } catch (err) {
                         console.error(err);
-                        return msg.channel.send('Geçerli veya hiçbir sayı giirlmedi, şarkı seçimi iptal ediliyor.');
+                        return msg.channel.send('Geçerli veya hiçbir sayı girilmedi, şarkı seçimi iptal ediliyor.');
                     }
                     const videoIndex = parseInt(response.first().content);
                     var video = await youtube.getVideoByID(videos[videoIndex - 1].id);
@@ -299,21 +315,31 @@ Lütfen 1 ile 10 arasından seç ve numarasını yaz
         return msg.channel.send(`Şimdi çalıyor ${serverQueue.songs[0].title}`);
     } else if (msg.content.startsWith(`${prefix}queue`)) {
         if (!serverQueue) return msg.channel.send('Şarkı çalmıyor.');
-        return msg.channel.send(`
+        try {
+            msg.channel.send (new Discord.MessageEmbed()
+            .setDescription("Şarkı Sırası")
+            .setColor("#33D7FF")
+            .addField("Şarkı", `${serverQueue.songs.map(song => `**-** ${song.title}`).join('\n')}`)
+            .addField("**Şimdi çalıyor:**", `${serverQueue.songs[0].title}`))
+        } catch (error) {
+
+        } return;
+        /*return msg.channel.send(`
 __**Şarkı sırası:**__
 ${serverQueue.songs.map(song => `**-** ${song.title}`).join('\n')}
 **Şimdi çalıyor:** ${serverQueue.songs[0].title}
-        `);
+        `);*/
     } else if (msg.content.startsWith(`${prefix}pause`)){
         if (serverQueue && serverQueue.playing) {
             serverQueue.playing = false;
-            serverQueue.connection.dispatcher.pause();
+            serverQueue.connection.dispatcher.pause(true);
             return msg.content.startsWith('Şarkı durduruldu!');
         }
         return msg.channel.send('Zaten şarkı çalmıyor.');
     } else if (msg.content.startsWith(`${prefix}resume`)){
         if (serverQueue && !serverQueue.playing) {
             serverQueue.playing = true;
+            serverQueue.connection.dispatcher.pause(false);
             serverQueue.connection.dispatcher.resume();
             return msg.channel.send('Şarkı başarıyla devam ettirildi!');
         }
@@ -331,7 +357,7 @@ async function handleVideo(video, msg, voiceChannel, playlist = false) {
 //    console.log(video);
     const song = {
         id: video.id,
-        title: Util.escapeMarkdown(video.title),
+        title: Discord.escapeMarkdown(video.title),
         url: `https://www.youtube.com/watch?v=${video.id}`
     };
     if (!serverQueue) {
@@ -360,7 +386,9 @@ async function handleVideo(video, msg, voiceChannel, playlist = false) {
         serverQueue.songs.push(song);
 //        console.log(serverQueue.songs);
         if (playlist) return undefined;
-        else return msg.channel.send(`**${song.title}** Sıraya eklendi.`);
+        else return msg.channel.send(new Discord.MessageEmbed()
+        .setColor("#F7FF00")
+        .addField("Şarkı", `**${song.title}** Sıraya eklendi.`))
     }
     return undefined;
 }
@@ -375,7 +403,7 @@ function play(guild, song) {
 
 //    console.log(serverQueue.songs);
 
-    const dispatcher = serverQueue.connection.playStream(ytdl(song.url))
+    const dispatcher = serverQueue.connection.play(ytdl(song.url))
         .on('end', reason => {
             if (reason == 'Stream is not generating quickly enough.') console.log('song ended');
             console.log(reason);
@@ -385,7 +413,9 @@ function play(guild, song) {
         .on('error', error => console.error(error));
     dispatcher.setVolumeLogarithmic(serverQueue.volume / 5);
 
-    serverQueue.textChannel.send(`Şarkı başladı : **${song.title}**`);
+    serverQueue.textChannel.send(new Discord.MessageEmbed()
+    .setColor("#0C9800")
+    .addField("Şarkı", `Şarkı başladı : **${song.title}**`))
 }
 
-bot.login(botconfig.token);
+bot.login(token);

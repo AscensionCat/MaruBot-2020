@@ -1,8 +1,8 @@
 const Discord = require("discord.js");
 
 module.exports.run = async (bot, message, args) => {
-    let sicon = message.guild.iconURL;
-    let serverembed = new Discord.RichEmbed()
+    let sicon = message.guild.iconURL({ format: 'png', dynamic: true, size: 1024 });
+    let serverembed = new Discord.MessageEmbed()
     .setDescription("Server Bilgisi")
     .setColor("#32a8a4")
     .setThumbnail(sicon)

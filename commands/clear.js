@@ -11,7 +11,7 @@ module.exports.run = async (bot, message, args) => {
         return;
     }
     
-    let embed = new Discord.RichEmbed()
+    let embed = new Discord.MessageEmbed()
         .setDescription("~Clear~")
         .setColor("#e56b00")
         .addField("Şu kadar mesajı sildi: ", `${deleteCount}`)
@@ -20,13 +20,13 @@ module.exports.run = async (bot, message, args) => {
         .addField("Silinme zamanı", message.createdAt);
     
     //let channel = message.guild.channels.find(`name`, "logs");
-    let channel = message.guild.channels.find(ch => ch.name === 'logs');
+    let channel = message.guild.channels.cache.find(ch => ch.name === 'logs');
     if (!channel) {
         message.channel.send("Bunu kullanmak için 'logs' isimli yazı kanalı oluşturmalısın.");
         return;
     }
     
-    const fetched = await message.channel.fetchMessages({ limit: deleteCount });
+    const fetched = await message.channel.messages.fetch({ limit: deleteCount });
     channel.send(embed);
     message.channel
         .bulkDelete(fetched)
