@@ -1,4 +1,5 @@
 const { token, prefix, GOOGLE_API_KEY, Authorid } = require("./botconfig.json"); //Yapımcı ID, Bot tokeni, Bot prefixi, Google api keyini botconfig.json dan alır
+const botconfig = require("./botconfig.json")
 const Discord = require("discord.js");
 const fs = require("fs");
 const ms = require("ms");
