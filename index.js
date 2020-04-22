@@ -294,18 +294,18 @@ Lütfen 1 ile 10 arasından seç ve numarasını yaz
             return handleVideo(video, msg, voiceChannel);
         }
     } else if (msg.content.startsWith(`${prefix}skip`)) {
-        if (!msg.member.voiceChannel) return msg.channel.send('Bir ses kanalında değilsin.');
+        if (!msg.member.voice.channel) return msg.channel.send('Bir ses kanalında değilsin.');
         if (!serverQueue) return msg.channel.send('Atlayabileceğim bir şarkı çalmıyor.');
         serverQueue.connection.dispatcher.end('Skip command has been used.');
         return undefined;
     } else if (msg.content.startsWith(`${prefix}stop`)) {
-        if (!msg.member.voiceChannel) return msg.channel.send('Bir ses kanalında değilsin.');
+        if (!msg.member.voice.channel) return msg.channel.send('Bir ses kanalında değilsin.');
         if (!serverQueue) return msg.channel.send('Durdurabileceğim bir şarkı çalmıyor.');
         serverQueue.songs = [];
         serverQueue.connection.dispatcher.end('stop command has been used.');
         return undefined;
     } else if(msg.content.startsWith(`${prefix}volume`)) {
-        if (!msg.member.voiceChannel) return msg.channel.send('Bir ses kanalında değilsin.');
+        if (!msg.member.voice.channel) return msg.channel.send('Bir ses kanalında değilsin.');
         if (!serverQueue) return msg.channel.send('Şarkı çalmıyor.');
         if (!args[1]) return msg.channel.send(`Şu anki ses: ${serverQueue.volume}`);
         serverQueue.volume = args[1];
