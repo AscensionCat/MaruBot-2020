@@ -6,7 +6,7 @@ dependencies:
   ms: 2.1.2
   node-opus: 0.3.3
   simple-youtube-api: 5.2.1
-  ytdl-core: 2.1.0
+  ytdl-core: 2.1.1
 packages:
   /@discordjs/collection/0.1.5:
     dev: false
@@ -621,7 +621,7 @@ packages:
       utf-8-validate: ^5.0.2
     resolution:
       integrity: sha512-HTDl9G9hbkNDk98naoR/cHDws7+EyYMOdL1BmjsZXRUjf7d+MficC4B7HLUPlSiho0vg+CWKrGIt/VJBd1xunQ==
-  /ytdl-core/2.1.0:
+  /ytdl-core/2.1.1:
     dependencies:
       html-entities: 1.3.1
       m3u8stream: 0.6.5
@@ -631,7 +631,7 @@ packages:
     engines:
       node: '>=10'
     resolution:
-      integrity: sha512-UmblkTLSV0v3y9I3oqrZkllyT0FnK1Owm7WftEkcTIlqnjip1mnyaLICz0P6+W3Ji/AtBFSwy/mLG2dlEvP6Vw==
+      integrity: sha512-rg1h6enMeBzShy4ZMam8k28VQfpSdxwZprCy3t38VvHn9DHzYqVk5Lvevy4QGkASScoYr1sIKGkNo0hh7NGRnA==
 registry: 'https://registry.npmjs.org/'
 shrinkwrapMinorVersion: 9
 shrinkwrapVersion: 3
@@ -643,4 +643,4 @@ specifiers:
   ms: ^2.1.2
   node-opus: ^0.3.3
   simple-youtube-api: ^5.2.1
-  ytdl-core: ^2.1.0
+  ytdl-core: ^2.1.1
