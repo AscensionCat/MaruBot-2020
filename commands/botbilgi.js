@@ -1,8 +1,8 @@
 const Discord = require("discord.js");
 
 module.exports.run = async (bot, message, args) => {
-        let bicon = bot.user.displayAvatarURL({ format: 'png', dynamic: true, size: 1024 });
-        let botembed = new Discord.MessageEmbed()
+        let bicon = bot.user.displayAvatarURL;
+        let botembed = new Discord.RichEmbed()
         .setDescription("Bot Bilgisi")
         .setColor("#2bff00")
         .setThumbnail(bicon)

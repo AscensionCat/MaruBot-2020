@@ -6,7 +6,7 @@ module.exports.run = async (bot, message, args) => {
     color: 0x2ed32e,
     fields: [{
         name: "🏓 Pong!",
-        value: `Pingim: ${Math.floor(msg.createdAt - message.createdAt)}ms \nAPI pingi: ${Math.round(bot.ws.ping)}ms`
+        value: `Pingim: ${Math.floor(msg.createdAt - message.createdAt)}ms \nAPI pingi: ${Math.round(bot.ping)}ms`
   }
  ],
 }

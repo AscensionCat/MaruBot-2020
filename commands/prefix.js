@@ -16,7 +16,7 @@ module.exports.run = async (bot, message, args) => {
         if (err) console.log(err)
     });
 
-    let sEmbed = new Discord.MessageEmbed()
+    let sEmbed = new Discord.RichEmbed()
     .setColor("#FF9900")
     .setTitle("Prefix Set")
     .setDescription(`Prefix ${args[0]} olarak değiştirildi`);

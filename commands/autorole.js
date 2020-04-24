@@ -17,7 +17,7 @@ module.exports.run = async (bot, message, args) => {
         if (err) console.log(err)
     });
 
-    let sEmbed = new Discord.MessageEmbed()
+    let sEmbed = new Discord.RichEmbed()
     .setColor("#8803fc")
     .setTitle("Autorole Set")
     .setDescription(`Otomatik verilecek rol ${args.slice(0).join(' ')} olarak değiştirildi`);

@@ -16,7 +16,7 @@ module.exports.run = async (bot, message, args) => {
         if (err) console.log(err)
     });
 
-    let sEmbed = new Discord.MessageEmbed()
+    let sEmbed = new Discord.RichEmbed()
     .setColor("#fc0314")
     .setTitle("Quit mesajı ayarlama")
     .setDescription(`quit mesajı ${args.slice(0).join(' ')} olarak değiştirildi`);

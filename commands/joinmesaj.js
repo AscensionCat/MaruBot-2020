@@ -16,7 +16,7 @@ module.exports.run = async (bot, message, args) => {
         if (err) console.log(err)
     });
 
-    let sEmbed = new Discord.MessageEmbed()
+    let sEmbed = new Discord.RichEmbed()
     .setColor("#03fc3d")
     .setTitle("Join mesajı ayarlama")
     .setDescription(`join mesajı ${args.slice(0).join(' ')} olarak değiştirildi`);
