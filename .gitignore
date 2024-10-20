@@ -1,3 +1,4 @@
+botconfig.json
 .config/
 .data/
 Cry/
@@ -6,4 +7,4 @@ Kiss/
 WhatGif/
 Yes/
 *.json
-botconfig.json
+
